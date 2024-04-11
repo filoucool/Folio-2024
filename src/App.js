@@ -18,14 +18,16 @@ function MoveControls() {
     left: false,
     right: false
   });
-  const speed = 0.05;
-  const playerHeight = 1.8; // Adjust for desired camera height
-  const bobbingSpeed = 12; // Adjust for desired bobbing speed
-  const bobbingAmount = 0.08; // Adjust for desired bobbing amount
+  const [isRunning, setIsRunning] = useState(false);
+  const walkSpeed = 0.05;
+  const runSpeed = 0.1; 
+  const playerHeight = 1.8;
+  const bobbingSpeed = 12;
+  const bobbingAmount = 0.08;
 
   useEffect(() => {
-    camera.position.y = playerHeight; // Set initial camera height
-  }, [camera.position.y]); // Depend on camera.position.y to avoid resetting it unnecessarily
+    camera.position.y = playerHeight;
+  }, [camera.position.y]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -34,6 +36,7 @@ function MoveControls() {
         case 's': setMovement(m => ({ ...m, backward: true })); break;
         case 'a': setMovement(m => ({ ...m, left: true })); break;
         case 'd': setMovement(m => ({ ...m, right: true })); break;
+        case 'Shift': setIsRunning(true); break;
         default: break;
       }
     };
@@ -43,6 +46,7 @@ function MoveControls() {
         case 's': setMovement(m => ({ ...m, backward: false })); break;
         case 'a': setMovement(m => ({ ...m, left: false })); break;
         case 'd': setMovement(m => ({ ...m, right: false })); break;
+        case 'Shift': setIsRunning(false); break;
         default: break;
       }
     };
@@ -63,8 +67,10 @@ function MoveControls() {
     const upVector = new THREE.Vector3(0, 1, 0);
 
     camera.getWorldDirection(direction);
-    flatDirection.set(direction.x, 0, direction.z).normalize(); // Remove vertical component
-    sideVector.crossVectors(upVector, flatDirection).normalize(); // Adjust side vector for flat movement
+    flatDirection.set(direction.x, 0, direction.z).normalize();
+    sideVector.crossVectors(upVector, flatDirection).normalize();
+
+    const speed = isRunning ? runSpeed : walkSpeed; // Use runSpeed if isRunning is true, else walkSpeed
 
     if (movement.forward) camera.position.addScaledVector(flatDirection, speed);
     if (movement.backward) camera.position.addScaledVector(flatDirection, -speed);

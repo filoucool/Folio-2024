@@ -1,7 +1,8 @@
-import React, { Suspense, useRef, useState, useEffect } from 'react';
-import { Canvas, useLoader, useThree, useFrame  } from '@react-three/fiber';
+import React, { Suspense, useState, useEffect } from 'react';
+import { Canvas, useLoader, useThree, useFrame } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { PointerLockControls } from '@react-three/drei';
+import * as THREE from 'three';
 import { createRoot } from 'react-dom/client';
 
 function Model({ modelPath }) {
@@ -16,16 +17,22 @@ function MoveControls() {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'w') setMovement(m => ({ ...m, forward: true }));
-      if (e.key === 's') setMovement(m => ({ ...m, backward: true }));
-      if (e.key === 'a') setMovement(m => ({ ...m, left: true }));
-      if (e.key === 'd') setMovement(m => ({ ...m, right: true }));
+      switch (e.key) {
+        case 'w': setMovement(m => ({ ...m, forward: true })); break;
+        case 's': setMovement(m => ({ ...m, backward: true })); break;
+        case 'a': setMovement(m => ({ ...m, left: true })); break;
+        case 'd': setMovement(m => ({ ...m, right: true })); break;
+        default: break;
+      }
     };
     const handleKeyUp = (e) => {
-      if (e.key === 'w') setMovement(m => ({ ...m, forward: false }));
-      if (e.key === 's') setMovement(m => ({ ...m, backward: false }));
-      if (e.key === 'a') setMovement(m => ({ ...m, left: false }));
-      if (e.key === 'd') setMovement(m => ({ ...m, right: false }));
+      switch (e.key) {
+        case 'w': setMovement(m => ({ ...m, forward: false })); break;
+        case 's': setMovement(m => ({ ...m, backward: false })); break;
+        case 'a': setMovement(m => ({ ...m, left: false })); break;
+        case 'd': setMovement(m => ({ ...m, right: false })); break;
+        default: break;
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -38,10 +45,18 @@ function MoveControls() {
   }, []);
 
   useFrame(() => {
-    if (movement.forward) camera.position.z -= speed;
-    if (movement.backward) camera.position.z += speed;
-    if (movement.left) camera.position.x -= speed;
-    if (movement.right) camera.position.x += speed;
+    const direction = new THREE.Vector3();
+    const sideVector = new THREE.Vector3();
+    const upVector = new THREE.Vector3(0, 1, 0);
+
+    camera.getWorldDirection(direction);
+    direction.normalize();
+    sideVector.crossVectors(upVector, direction).normalize();
+
+    if (movement.forward) camera.position.addScaledVector(direction, speed);
+    if (movement.backward) camera.position.addScaledVector(direction, -speed);
+    if (movement.left) camera.position.addScaledVector(sideVector, speed);
+    if (movement.right) camera.position.addScaledVector(sideVector, -speed);
   });
 
   return null;

@@ -5,6 +5,11 @@ import { OrbitControls } from '@react-three/drei'; // If you're okay with OrbitC
 import { createRoot } from 'react-dom/client';
 import { PointerLockControls } from '@react-three/drei';
 
+function Model({ modelPath }) {
+  const glb = useLoader(GLTFLoader, modelPath);
+  return <primitive object={glb.scene} />;
+}
+
 function App() {
   return (
     <div id="canvas-container">

@@ -1,4 +1,4 @@
-import React, { Suspense, useState, useEffect } from 'react';
+import React, { Suspense, useState, useEffect, useRef } from 'react';
 import { Canvas, useLoader, useThree, useFrame } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { PointerLockControls } from '@react-three/drei';
@@ -20,7 +20,7 @@ function MoveControls() {
   });
   const [isRunning, setIsRunning] = useState(false);
   const walkSpeed = 0.05;
-  const runSpeed = 0.1; 
+  const runSpeed = 0.1;
   const playerHeight = 1.8;
   const bobbingSpeed = 12;
   const bobbingAmount = 0.08;
@@ -31,23 +31,20 @@ function MoveControls() {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      switch (e.key) {
-        case 'w': setMovement(m => ({ ...m, forward: true })); break;
-        case 's': setMovement(m => ({ ...m, backward: true })); break;
-        case 'a': setMovement(m => ({ ...m, left: true })); break;
-        case 'd': setMovement(m => ({ ...m, right: true })); break;
-        case 'Shift': setIsRunning(true); break;
-        default: break;
+      const key = e.key.toLowerCase(); // Normalize key value to lowercase
+      if (key === 'shift') {
+        setIsRunning(true);
+      } else {
+        setMovement((m) => ({ ...m, [keyMap[key]]: true }));
       }
     };
+
     const handleKeyUp = (e) => {
-      switch (e.key) {
-        case 'w': setMovement(m => ({ ...m, forward: false })); break;
-        case 's': setMovement(m => ({ ...m, backward: false })); break;
-        case 'a': setMovement(m => ({ ...m, left: false })); break;
-        case 'd': setMovement(m => ({ ...m, right: false })); break;
-        case 'Shift': setIsRunning(false); break;
-        default: break;
+      const key = e.key.toLowerCase(); // Normalize key value to lowercase
+      if (key === 'shift') {
+        setIsRunning(false);
+      } else {
+        setMovement((m) => ({ ...m, [keyMap[key]]: false }));
       }
     };
 
@@ -65,30 +62,35 @@ function MoveControls() {
     const flatDirection = new THREE.Vector3();
     const sideVector = new THREE.Vector3();
     const upVector = new THREE.Vector3(0, 1, 0);
-
     camera.getWorldDirection(direction);
     flatDirection.set(direction.x, 0, direction.z).normalize();
     sideVector.crossVectors(upVector, flatDirection).normalize();
 
-    const speed = isRunning ? runSpeed : walkSpeed; // Use runSpeed if isRunning is true, else walkSpeed
+    const speed = isRunning ? runSpeed : walkSpeed;
 
     if (movement.forward) camera.position.addScaledVector(flatDirection, speed);
     if (movement.backward) camera.position.addScaledVector(flatDirection, -speed);
     if (movement.left) camera.position.addScaledVector(sideVector, speed);
     if (movement.right) camera.position.addScaledVector(sideVector, -speed);
 
-    // Head bobbing effect
     if (movement.forward || movement.backward || movement.left || movement.right) {
       const time = clock.getElapsedTime();
       camera.position.y = playerHeight + Math.sin(time * bobbingSpeed) * bobbingAmount;
     } else {
-      // Reset camera height if not moving
       camera.position.y = playerHeight;
     }
   });
 
   return null;
 }
+
+// Mapping keys to movement directions
+const keyMap = {
+  'w': 'forward',
+  's': 'backward',
+  'a': 'left',
+  'd': 'right'
+};
 
 function App() {
   const modelPath = '/media/3DModels/maker_desk.glb';

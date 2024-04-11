@@ -19,9 +19,9 @@ function MoveControls() {
     right: false
   });
   const speed = 0.05;
-  const playerHeight = 1.8; // desired camera height
-  const bobbingSpeed = 12; // desired bobbing speed
-  const bobbingAmount = 0.08; // desired bobbing amount
+  const playerHeight = 1.8; // Adjust for desired camera height
+  const bobbingSpeed = 12; // Adjust for desired bobbing speed
+  const bobbingAmount = 0.08; // Adjust for desired bobbing amount
 
   useEffect(() => {
     camera.position.y = playerHeight; // Set initial camera height
@@ -58,15 +58,16 @@ function MoveControls() {
 
   useFrame(() => {
     const direction = new THREE.Vector3();
+    const flatDirection = new THREE.Vector3();
     const sideVector = new THREE.Vector3();
     const upVector = new THREE.Vector3(0, 1, 0);
 
     camera.getWorldDirection(direction);
-    direction.normalize();
-    sideVector.crossVectors(upVector, direction).normalize();
+    flatDirection.set(direction.x, 0, direction.z).normalize(); // Remove vertical component
+    sideVector.crossVectors(upVector, flatDirection).normalize(); // Adjust side vector for flat movement
 
-    if (movement.forward) camera.position.addScaledVector(direction, speed);
-    if (movement.backward) camera.position.addScaledVector(direction, -speed);
+    if (movement.forward) camera.position.addScaledVector(flatDirection, speed);
+    if (movement.backward) camera.position.addScaledVector(flatDirection, -speed);
     if (movement.left) camera.position.addScaledVector(sideVector, speed);
     if (movement.right) camera.position.addScaledVector(sideVector, -speed);
 

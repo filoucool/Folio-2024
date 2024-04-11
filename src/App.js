@@ -9,6 +9,7 @@ function Model({ modelPath }) {
   const glb = useLoader(GLTFLoader, modelPath);
   return <primitive object={glb.scene} />;
 }
+
 function MoveControls() {
   const { camera, clock } = useThree();
   const [movement, setMovement] = useState({

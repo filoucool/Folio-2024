@@ -1,13 +1,27 @@
 import React, { Suspense, useState, useEffect, useRef } from 'react';
 import { Canvas, useLoader, useThree, useFrame } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { Plane } from '@react-three/drei';
 import { PointerLockControls } from '@react-three/drei';
 import * as THREE from 'three';
 import { createRoot } from 'react-dom/client';
+import AxisTriad from './AxisTriad';
 
 function Model({ modelPath }) {
   const glb = useLoader(GLTFLoader, modelPath);
   return <primitive object={glb.scene} />;
+}
+
+function RestrictedZone() {
+  // Assuming a simple rectangular zone for demonstration
+  const position = [-1, -3.50, 0]; // Slightly above the ground to be visible
+  const args = [6, 4]; // Size of the zone
+  return (
+    <Plane args={args} position={position} rotation={[-Math.PI / 2, 0, 0]}>
+      {/* Applying color through the material */}
+      <meshStandardMaterial attach="material" color="red" />
+    </Plane>
+  );
 }
 
 function MoveControls() {
@@ -24,14 +38,23 @@ function MoveControls() {
   const playerHeight = 1.8;
   const bobbingSpeed = 12;
   const bobbingAmount = 0.08;
+  const [isOutside, setIsOutside] = useState(true);
+
+  // Define the restricted zone's bounds
+  const zoneBounds = {
+    minX: -4,
+    maxX: 2.5,
+    minZ: -2,
+    maxZ: 2,
+  };
 
   useEffect(() => {
     camera.position.y = playerHeight;
-  }, [camera.position.y]);
+  }, [camera.position.y, playerHeight]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      const key = e.key.toLowerCase(); // Normalize key value to lowercase
+      const key = e.key.toLowerCase();
       if (key === 'shift') {
         setIsRunning(true);
       } else {
@@ -40,7 +63,7 @@ function MoveControls() {
     };
 
     const handleKeyUp = (e) => {
-      const key = e.key.toLowerCase(); // Normalize key value to lowercase
+      const key = e.key.toLowerCase();
       if (key === 'shift') {
         setIsRunning(false);
       } else {
@@ -68,17 +91,31 @@ function MoveControls() {
 
     const speed = isRunning ? runSpeed : walkSpeed;
 
-    if (movement.forward) camera.position.addScaledVector(flatDirection, speed);
-    if (movement.backward) camera.position.addScaledVector(flatDirection, -speed);
-    if (movement.left) camera.position.addScaledVector(sideVector, speed);
-    if (movement.right) camera.position.addScaledVector(sideVector, -speed);
+    // Calculate new position without applying it directly
+    let newPosition = camera.position.clone();
+    if (movement.forward) newPosition.addScaledVector(flatDirection, speed);
+    if (movement.backward) newPosition.addScaledVector(flatDirection, -speed);
+    if (movement.left) newPosition.addScaledVector(sideVector, speed);
+    if (movement.right) newPosition.addScaledVector(sideVector, -speed);
 
+    // Check if the new position is outside the restricted zone
+    const isEnteringRestrictedZone = newPosition.x > zoneBounds.minX && newPosition.x < zoneBounds.maxX && newPosition.z > zoneBounds.minZ && newPosition.z < zoneBounds.maxZ;
+
+    if (!isEnteringRestrictedZone || isOutside) {
+      // Apply movement if not entering the restricted zone or already outside
+      camera.position.copy(newPosition);
+    }
+
+    // Head bobbing effect
     if (movement.forward || movement.backward || movement.left || movement.right) {
       const time = clock.getElapsedTime();
       camera.position.y = playerHeight + Math.sin(time * bobbingSpeed) * bobbingAmount;
     } else {
       camera.position.y = playerHeight;
     }
+
+    // Update the outside status based on the player's current position
+    setIsOutside(!isEnteringRestrictedZone);
   });
 
   return null;
@@ -105,6 +142,8 @@ function App() {
         </Suspense>
         <PointerLockControls />
         <MoveControls />
+        <RestrictedZone />
+        <AxisTriad size={4} />
       </Canvas>
     </div>
   );

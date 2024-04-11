@@ -13,12 +13,10 @@ function Model({ modelPath }) {
 }
 
 function RestrictedZone() {
-  // Assuming a simple rectangular zone for demonstration
-  const position = [-1, -3.50, 0]; // Slightly above the ground to be visible
-  const args = [6, 4]; // Size of the zone
+  const position = [-1, -3.50, 0];
+  const args = [6, 4];
   return (
     <Plane args={args} position={position} rotation={[-Math.PI / 2, 0, 0]}>
-      {/* Applying color through the material */}
       <meshStandardMaterial attach="material" color="red" />
     </Plane>
   );
@@ -40,7 +38,6 @@ function MoveControls() {
   const bobbingAmount = 0.08;
   const [isOutside, setIsOutside] = useState(true);
 
-  // Define the restricted zone's bounds
   const zoneBounds = {
     minX: -4,
     maxX: 2.5,
@@ -114,7 +111,6 @@ function MoveControls() {
       camera.position.y = playerHeight;
     }
 
-    // Update the outside status based on the player's current position
     setIsOutside(!isEnteringRestrictedZone);
   });
 

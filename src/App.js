@@ -18,9 +18,9 @@ function MoveControls() {
     right: false
   });
   const speed = 0.05;
-  const playerHeight = 1.8; // Adjust for desired camera height
-  const bobbingSpeed = 12; // Adjust for desired bobbing speed
-  const bobbingAmount = 0.08; // Adjust for desired bobbing amount
+  const playerHeight = 1.8; // desired camera height
+  const bobbingSpeed = 12; // desired bobbing speed
+  const bobbingAmount = 0.08; // desired bobbing amount
 
   useEffect(() => {
     camera.position.y = playerHeight; // Set initial camera height

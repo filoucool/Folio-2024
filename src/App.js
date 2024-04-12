@@ -1,8 +1,7 @@
 import React, { Suspense, useState, useEffect, useRef } from 'react';
 import { Canvas, useLoader, useThree, useFrame } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import { Plane } from '@react-three/drei';
-import { PointerLockControls } from '@react-three/drei';
+import { Plane, PointerLockControls, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { createRoot } from 'react-dom/client';
 import AxisTriad from './AxisTriad';
@@ -36,7 +35,7 @@ function MoveControls() {
   const playerHeight = 1.8;
   const bobbingSpeed = 12;
   const bobbingAmount = 0.08;
-  const [isOutside, setIsOutside] = useState(true);
+  const [isMoving, setIsMoving] = useState(false);
 
   const zoneBounds = {
     minX: -4,
@@ -54,8 +53,12 @@ function MoveControls() {
       const key = e.key.toLowerCase();
       if (key === 'shift') {
         setIsRunning(true);
-      } else {
-        setMovement((m) => ({ ...m, [keyMap[key]]: true }));
+      } else if (keyMap[key]) {
+        setMovement(prevMovement => {
+          const updatedMovement = { ...prevMovement, [keyMap[key]]: true };
+          setIsMoving(Object.values(updatedMovement).some(value => value));
+          return updatedMovement;
+        });
       }
     };
 
@@ -63,8 +66,12 @@ function MoveControls() {
       const key = e.key.toLowerCase();
       if (key === 'shift') {
         setIsRunning(false);
-      } else {
-        setMovement((m) => ({ ...m, [keyMap[key]]: false }));
+      } else if (keyMap[key]) {
+        setMovement(prevMovement => {
+          const updatedMovement = { ...prevMovement, [keyMap[key]]: false };
+          setIsMoving(Object.values(updatedMovement).some(value => value));
+          return updatedMovement;
+        });
       }
     };
 
@@ -87,7 +94,7 @@ function MoveControls() {
     sideVector.crossVectors(upVector, flatDirection).normalize();
 
     const speed = isRunning ? runSpeed : walkSpeed;
-
+  
     // Calculate new position without applying it directly
     let newPosition = camera.position.clone();
     if (movement.forward) newPosition.addScaledVector(flatDirection, speed);
@@ -95,28 +102,21 @@ function MoveControls() {
     if (movement.left) newPosition.addScaledVector(sideVector, speed);
     if (movement.right) newPosition.addScaledVector(sideVector, -speed);
 
-    // Check if the new position is outside the restricted zone
-    const isEnteringRestrictedZone = newPosition.x > zoneBounds.minX && newPosition.x < zoneBounds.maxX && newPosition.z > zoneBounds.minZ && newPosition.z < zoneBounds.maxZ;
-
-    if (!isEnteringRestrictedZone || isOutside) {
-      // Apply movement if not entering the restricted zone or already outside
-      camera.position.copy(newPosition);
-    }
-
     // Head bobbing effect
-    if (movement.forward || movement.backward || movement.left || movement.right) {
-      const time = clock.getElapsedTime();
-      camera.position.y = playerHeight + Math.sin(time * bobbingSpeed) * bobbingAmount;
-    } else {
-      camera.position.y = playerHeight;
+    if (!isPositionInRestrictedZone(newPosition)) {
+      camera.position.copy(newPosition);
+      camera.position.y = isMoving ? playerHeight + Math.sin(clock.getElapsedTime() * bobbingSpeed) * bobbingAmount : playerHeight;
     }
-
-    setIsOutside(!isEnteringRestrictedZone);
   });
+
+  // Check if the new position is in the restricted zone
+  function isPositionInRestrictedZone(position) {
+    return position.x > zoneBounds.minX && position.x < zoneBounds.maxX &&
+           position.z > zoneBounds.minZ && position.z < zoneBounds.maxZ;
+  }
 
   return null;
 }
-
 // Mapping keys to movement directions
 const keyMap = {
   'w': 'forward',

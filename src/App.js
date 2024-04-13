@@ -42,11 +42,11 @@ function MoveControls() {
     right: false
   });
   const [isRunning, setIsRunning] = useState(false);
-  const walkSpeed = 0.05;
-  const runSpeed = 0.1;
+  const walkSpeed = 0.12;
+  const runSpeed = 0.2;
   const playerHeight = 1.8;
   const bobbingSpeed = 12;
-  const bobbingAmount = 0.08;
+  const bobbingAmount = 0.09;
   const [isMoving, setIsMoving] = useState(false);
 
   const zoneBounds = {

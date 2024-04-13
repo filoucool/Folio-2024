@@ -5,6 +5,7 @@ import { Plane, PointerLockControls, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { createRoot } from 'react-dom/client';
 import AxisTriad from './AxisTriad';
+import { TextureLoader } from 'three';
 
 function Model({ modelPath }) {
   const glb = useLoader(GLTFLoader, modelPath);
@@ -17,6 +18,17 @@ function RestrictedZone() {
   return (
     <Plane args={args} position={position} rotation={[-Math.PI / 2, 0, 0]}>
       <meshStandardMaterial attach="material" color="red" />
+    </Plane>
+  );
+}
+
+function TexturedFloor({ texturePath }) {
+  const texture = useLoader(TextureLoader, texturePath);
+  const args = [60, 60];
+
+  return (
+    <Plane args={args} rotation={[-Math.PI / 2, 0, 0]} position={[0, -3.51, 0]}>
+      <meshStandardMaterial attach="material" map={texture} />
     </Plane>
   );
 }
@@ -148,6 +160,7 @@ function CameraPositionDisplay() {
 
 function App() {
   const modelPath = '/media/3DModels/maker_desk.glb';
+  const floorTexturePath = '/media/textures/garage_floor.jpg';
 
   return (
     <div id="canvas-container" style={{ height: '100vh', width: '100vw' }}>
@@ -162,6 +175,7 @@ function App() {
         <RestrictedZone />
         <AxisTriad size={4} />
         <CameraPositionDisplay />
+        <TexturedFloor texturePath={floorTexturePath} />
       </Canvas>
     </div>
   );

@@ -2,10 +2,11 @@ import React, { Suspense, useState, useEffect, useRef } from 'react';
 import { Canvas, useLoader, useThree, useFrame } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { Plane, PointerLockControls, Html } from '@react-three/drei';
+import { TextureLoader } from 'three';
 import * as THREE from 'three';
 import { createRoot } from 'react-dom/client';
+import { Physics, useBox, usePlane } from '@react-three/cannon';
 import AxisTriad from './AxisTriad';
-import { TextureLoader } from 'three';
 
 function Model({ modelPath }) {
   const glb = useLoader(GLTFLoader, modelPath);
@@ -24,12 +25,31 @@ function RestrictedZone() {
 
 function TexturedFloor({ texturePath }) {
   const texture = useLoader(TextureLoader, texturePath);
-  const args = [60, 60];
+  const [ref] = usePlane(() => ({
+    rotation: [-Math.PI / 2, 0, 0],
+    position: [0, -3.51, 0],
+    static: true,
+  }));
 
   return (
-    <Plane args={args} rotation={[-Math.PI / 2, 0, 0]} position={[0, -3.51, 0]}>
+    <mesh ref={ref}>
+      <planeGeometry attach="geometry" args={[60, 60]} />
       <meshStandardMaterial attach="material" map={texture} />
-    </Plane>
+    </mesh>
+  );
+}
+
+function FallingCube() {
+  const [ref] = useBox(() => ({
+    mass: 1,
+    position: [0, 5, 0], 
+  }));
+
+  return (
+    <mesh ref={ref}>
+      <boxGeometry  attach="geometry" args={[1, 1, 1]} />  // Cube dimensions
+      <meshStandardMaterial attach="material" color="blue" />
+    </mesh>
   );
 }
 
@@ -165,17 +185,20 @@ function App() {
   return (
     <div id="canvas-container" style={{ height: '100vh', width: '100vw' }}>
       <Canvas>
-        <ambientLight intensity={0.1} />
-        <directionalLight color="white" position={[1, 10, 15]} />
-        <Suspense fallback={null}>
-          <Model modelPath={modelPath} />
-        </Suspense>
-        <PointerLockControls />
-        <MoveControls />
-        <RestrictedZone />
-        <AxisTriad size={4} />
-        <CameraPositionDisplay />
-        <TexturedFloor texturePath={floorTexturePath} />
+        <Physics>
+          <ambientLight intensity={0.1} />
+          <directionalLight color="white" position={[1, 10, 15]} />
+          <Suspense fallback={null}>
+            <Model modelPath={modelPath} />
+          </Suspense>
+          <PointerLockControls />
+          <MoveControls />
+          <RestrictedZone />
+          <AxisTriad size={4} />
+          <CameraPositionDisplay />
+          <TexturedFloor texturePath={floorTexturePath} />
+          <FallingCube />
+        </Physics>
       </Canvas>
     </div>
   );

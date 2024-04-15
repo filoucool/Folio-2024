@@ -189,19 +189,45 @@ function App() {
 
   return (
     <div id="canvas-container" style={{ height: '100vh', width: '100vw' }}>
-      <div style={{
-        position: 'absolute',
-        top: '10px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        color: 'white',
-        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-        padding: '8px',
-        borderRadius: '5px',
-        zIndex: 1000 
-      }}>
-        Welcome to my porfolio!
-      </div>
+      {showOverlay && (
+        <div id="overlay">
+          <div style={{
+            position: 'absolute',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            color: 'white',
+            zIndex: 1000 
+          }}>
+          <img src="/media/Images/wasd-eye.png" style={{
+            position: "absolute",
+            left: "-40vw",
+            top: "10vh",
+            maxHeight: "25vh",
+            maxWidth: "25vw",
+          }}/>
+            <p style={{
+              position: "absolute",
+              backgroundColor: 'rgba(0, 0, 0, 0.7)',
+              padding: "10px 10px",
+              borderRadius: "10px",
+              left: "-42vw",
+              textAlign: "center"
+            }}>
+              Use WASD to move around and the mouse to look around.
+              <span style={{display: "block"}}>Press escape to leave the 3D environment.</span>
+            </p>
+            <p style={{
+              backgroundColor: 'rgba(0, 0, 0, 0.7)',
+              padding: "10px 10px",
+              borderRadius: "10px",
+              textAlign: "center"
+            }}>
+              Welcome to my porfolio!
+              <span style={{display: "block"}}>Press 'M' to show/hide the overlay.</span>
+            </p>
+          </div>
+        </div>
+      )}
       <Canvas>
         <Physics>
           <ambientLight intensity={0.1} />

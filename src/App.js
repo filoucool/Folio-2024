@@ -126,13 +126,17 @@ function MoveControls() {
     sideVector.crossVectors(upVector, flatDirection).normalize();
 
     const speed = isRunning ? runSpeed : walkSpeed;
-  
+    let movementVector = new THREE.Vector3();
+
     // Calculate new position without applying it directly
-    let newPosition = camera.position.clone();
-    if (movement.forward) newPosition.addScaledVector(flatDirection, speed);
-    if (movement.backward) newPosition.addScaledVector(flatDirection, -speed);
-    if (movement.left) newPosition.addScaledVector(sideVector, speed);
-    if (movement.right) newPosition.addScaledVector(sideVector, -speed);
+    if (movement.forward) movementVector.add(flatDirection);
+    if (movement.backward) movementVector.sub(flatDirection);
+    if (movement.left) movementVector.add(sideVector);
+    if (movement.right) movementVector.sub(sideVector);
+
+    movementVector.normalize().multiplyScalar(speed);  // Normalize and apply speed
+
+    let newPosition = camera.position.clone().add(movementVector);
 
     // Head bobbing effect
     if (!isPositionInRestrictedZone(newPosition)) {

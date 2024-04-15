@@ -8,18 +8,10 @@ import { createRoot } from 'react-dom/client';
 import { Physics, useBox, usePlane } from '@react-three/cannon';
 import AxisTriad from './AxisTriad';
 
-function Model({ modelPath }) {
+function Model({ modelPath, position }) {
   const glb = useLoader(GLTFLoader, modelPath);
-  return <primitive object={glb.scene} />;
-}
-
-function RestrictedZone() {
-  const position = [-1, -3.50, 0];
-  const args = [6, 4];
   return (
-    <Plane args={args} position={position} rotation={[-Math.PI / 2, 0, 0]}>
-      <meshStandardMaterial attach="material" color="red" />
-    </Plane>
+    <primitive object={glb.scene} position={position} />
   );
 }
 
@@ -68,13 +60,6 @@ function MoveControls() {
   const bobbingSpeed = 12;
   const bobbingAmount = 0.09;
   const [isMoving, setIsMoving] = useState(false);
-
-  const zoneBounds = {
-    minX: -4,
-    maxX: 2.5,
-    minZ: -2,
-    maxZ: 2,
-  };
 
   useEffect(() => {
     camera.position.y = playerHeight;
@@ -139,18 +124,9 @@ function MoveControls() {
     let newPosition = camera.position.clone().add(movementVector);
 
     // Head bobbing effect
-    if (!isPositionInRestrictedZone(newPosition)) {
-      camera.position.copy(newPosition);
-      camera.position.y = isMoving ? playerHeight + Math.sin(clock.getElapsedTime() * bobbingSpeed) * bobbingAmount : playerHeight;
-    }
+    camera.position.copy(newPosition);
+    camera.position.y = isMoving ? playerHeight + Math.sin(clock.getElapsedTime() * bobbingSpeed) * bobbingAmount : playerHeight;
   });
-
-  // Check if the new position is in the restricted zone
-  function isPositionInRestrictedZone(position) {
-    return position.x > zoneBounds.minX && position.x < zoneBounds.maxX &&
-           position.z > zoneBounds.minZ && position.z < zoneBounds.maxZ;
-  }
-
   return null;
 }
 
@@ -278,11 +254,10 @@ function App() {
             <directionalLight color="white" position={[1, 10, 15]} />
             <Suspense fallback={null}>
               <Environment background={true} files="/media/textures/concrete_wall.jpg" />
-              <Model modelPath={modelPath} />
+              <Model modelPath={modelPath} position={[1, 0, -2]} />
             </Suspense>
             <PointerLockControls />
             <MoveControls />
-            <RestrictedZone />
             <AxisTriad size={4} />
             <CameraPositionDisplay />
             <TexturedFloor texturePath={floorTexturePath} />

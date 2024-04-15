@@ -149,6 +149,7 @@ function MoveControls() {
 
   return null;
 }
+
 // Mapping keys to movement directions
 const keyMap = {
   'w': 'forward',

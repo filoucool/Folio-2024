@@ -1,7 +1,7 @@
 import React, { Suspense, useState, useEffect, useRef } from 'react';
 import { Canvas, useLoader, useThree, useFrame } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import { Plane, PointerLockControls, Html } from '@react-three/drei';
+import { Plane, PointerLockControls, Html, Environment, useTexture } from '@react-three/drei';
 import { TextureLoader } from 'three';
 import * as THREE from 'three';
 import { createRoot } from 'react-dom/client';
@@ -207,6 +207,7 @@ function App() {
           <ambientLight intensity={0.1} />
           <directionalLight color="white" position={[1, 10, 15]} />
           <Suspense fallback={null}>
+            <Environment background={true} files="/media/textures/concrete_wall.jpg" />  // Add your HDR sky texture here
             <Model modelPath={modelPath} />
           </Suspense>
           <PointerLockControls />

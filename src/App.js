@@ -189,6 +189,19 @@ function App() {
 
   return (
     <div id="canvas-container" style={{ height: '100vh', width: '100vw' }}>
+      <div style={{
+        position: 'absolute',
+        top: '10px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        color: 'white',
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        padding: '8px',
+        borderRadius: '5px',
+        zIndex: 1000 
+      }}>
+        Welcome to my porfolio!
+      </div>
       <Canvas>
         <Physics>
           <ambientLight intensity={0.1} />

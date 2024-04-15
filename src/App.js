@@ -1,7 +1,7 @@
-import React, { Suspense, useState, useEffect, useRef } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import { Canvas, useLoader, useThree, useFrame } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import { Plane, PointerLockControls, Html, Environment, useTexture } from '@react-three/drei';
+import { Plane, PointerLockControls, Html, Environment } from '@react-three/drei';
 import { TextureLoader } from 'three';
 import * as THREE from 'three';
 import { createRoot } from 'react-dom/client';
@@ -47,7 +47,7 @@ function FallingCube() {
 
   return (
     <mesh ref={ref}>
-      <boxGeometry  attach="geometry" args={[1, 1, 1]} />  // Cube dimensions
+      <boxGeometry  attach="geometry" args={[1, 1, 1]} />
       <meshStandardMaterial attach="material" color="blue" />
     </mesh>
   );
@@ -78,7 +78,7 @@ function MoveControls() {
 
   useEffect(() => {
     camera.position.y = playerHeight;
-  }, [camera.position.y, playerHeight]);
+  },);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -188,63 +188,63 @@ function App() {
   const floorTexturePath = '/media/textures/garage_floor.jpg';
 
   return (
-    <div id="canvas-container" style={{ height: '100vh', width: '100vw' }}>
-      {showOverlay && (
-        <div id="overlay">
-          <div style={{
-            position: 'absolute',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            color: 'white',
-            zIndex: 1000 
-          }}>
-          <img src="/media/Images/wasd-eye.png" style={{
+    <div>
+      <div id="overlay">
+        <div style={{
+          position: 'absolute',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          color: 'white',
+          zIndex: 1000 
+        }}>
+        <img src="/media/Images/wasd-eye.png" alt="WASD controls" style={{
+          position: "absolute",
+          left: "-40vw",
+          top: "10vh",
+          maxHeight: "25vh",
+          maxWidth: "25vw",
+        }}/>
+          <p style={{
             position: "absolute",
-            left: "-40vw",
-            top: "10vh",
-            maxHeight: "25vh",
-            maxWidth: "25vw",
-          }}/>
-            <p style={{
-              position: "absolute",
-              backgroundColor: 'rgba(0, 0, 0, 0.7)',
-              padding: "10px 10px",
-              borderRadius: "10px",
-              left: "-42vw",
-              textAlign: "center"
-            }}>
-              Use WASD to move around and the mouse to look around.
-              <span style={{display: "block"}}>Press escape to leave the 3D environment.</span>
-            </p>
-            <p style={{
-              backgroundColor: 'rgba(0, 0, 0, 0.7)',
-              padding: "10px 10px",
-              borderRadius: "10px",
-              textAlign: "center"
-            }}>
-              Welcome to my porfolio!
-              <span style={{display: "block"}}>Press 'M' to show/hide the overlay.</span>
-            </p>
-          </div>
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            padding: "10px 10px",
+            borderRadius: "10px",
+            left: "-42vw",
+            textAlign: "center"
+          }}>
+            Use WASD to move around and the mouse to look around.
+            <span style={{display: "block"}}>Press escape to leave the 3D environment.</span>
+          </p>
+          <p style={{
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            padding: "10px 10px",
+            borderRadius: "10px",
+            textAlign: "center"
+          }}>
+            Welcome to my porfolio!
+            <span style={{display: "block"}}>Press 'M' to show/hide the overlay.</span>
+          </p>
         </div>
-      )}
-      <Canvas>
-        <Physics>
-          <ambientLight intensity={0.1} />
-          <directionalLight color="white" position={[1, 10, 15]} />
-          <Suspense fallback={null}>
-            <Environment background={true} files="/media/textures/concrete_wall.jpg" />  // Add your HDR sky texture here
-            <Model modelPath={modelPath} />
-          </Suspense>
-          <PointerLockControls />
-          <MoveControls />
-          <RestrictedZone />
-          <AxisTriad size={4} />
-          <CameraPositionDisplay />
-          <TexturedFloor texturePath={floorTexturePath} />
-          <FallingCube />
-        </Physics>
-      </Canvas>
+      </div>
+      <div id="canvas-container" style={{ height: '100vh', width: '100vw' }}>
+        <Canvas>
+          <Physics>
+            <ambientLight intensity={0.1} />
+            <directionalLight color="white" position={[1, 10, 15]} />
+            <Suspense fallback={null}>
+              <Environment background={true} files="/media/textures/concrete_wall.jpg" />
+              <Model modelPath={modelPath} />
+            </Suspense>
+            <PointerLockControls />
+            <MoveControls />
+            <RestrictedZone />
+            <AxisTriad size={4} />
+            <CameraPositionDisplay />
+            <TexturedFloor texturePath={floorTexturePath} />
+            <FallingCube />
+          </Physics>
+        </Canvas>
+      </div>
     </div>
   );
 }

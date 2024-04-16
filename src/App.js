@@ -39,6 +39,8 @@ function MoveControls() {
     mass: 70,
     type: 'Dynamic',
     position: [0, 1.8, 0],
+    linearDamping: 0.9,  // High linear damping to quickly reduce sliding
+    angularDamping: 0.9  // Angular damping can also be set if needed
   }));
   const [movement, setMovement] = useState({
     forward: false,
@@ -48,7 +50,7 @@ function MoveControls() {
   });
   const [isRunning, setIsRunning] = useState(false);
   const walkSpeed = 1.5;
-  const runSpeed = 3;
+  const runSpeed = 3.0;
   const bobbingSpeed = 12;
   const bobbingAmount = 0.09;
   const [isMoving, setIsMoving] = useState(false);
@@ -99,7 +101,10 @@ function MoveControls() {
   }, []);
 
   useFrame(() => {
-    if (!isMoving) return;
+    if (!isMoving) {
+      api.velocity.set(0, 0, 0);  // Stop the movement when no key is pressed
+      return;
+    }
 
     const direction = new THREE.Vector3();
     camera.getWorldDirection(direction);
@@ -121,7 +126,6 @@ function MoveControls() {
   return null;
 }
 
-// Mapping keys to movement directions
 const keyMap = {
   'w': 'forward',
   's': 'backward',

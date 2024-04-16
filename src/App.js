@@ -6,7 +6,7 @@ import { TextureLoader } from 'three';
 import * as THREE from 'three';
 import { createRoot } from 'react-dom/client';
 import { Physics, useBox, usePlane } from '@react-three/cannon';
-import AxisTriad from './AxisTriad';
+import AxisTriad from './dev_tools';
 
 function Model({ modelPath, position }) {
   const glb = useLoader(GLTFLoader, modelPath);

@@ -43,17 +43,18 @@ function MoveControls() {
     right: false
   });
   const [isRunning, setIsRunning] = useState(false);
-  const walkSpeed = 1.5;
-  const runSpeed = 3.0;
+  const walkSpeed = 3.5;
+  const runSpeed = 8;
   const bobbingSpeed = 12;
   const bobbingAmount = 0.09;
   const [isMoving, setIsMoving] = useState(false);
 
-  const [ref, api] = useSphere(() => ({
+  const [ref, api] = useBox(() => ({
     mass: 70,
-    type: 'Dynamic',
     position: [0, 0, 0],
-    linearDamping: 0.1,
+    args: [0.9, 4, 0.9],
+    type: 'Dynamic',
+    linearDamping: 0.9,
     angularDamping: 1,
     allowSleep: false
   }));
@@ -71,7 +72,7 @@ function MoveControls() {
   // Subscribe to position updates
   useEffect(() => {
     const unsubscribe = api.position.subscribe(pos => {
-      camera.position.set(pos[0], pos[1], pos[2]);
+      camera.position.set(pos[0], pos[1] + 2, pos[2]);
       if (isMoving) {
         camera.position.y += Math.sin(clock.getElapsedTime() * bobbingSpeed) * bobbingAmount;
       }

@@ -8,7 +8,7 @@ function FallingCube() {
 
     return (
         <mesh ref={ref}>
-            <boxGeometry  attach="geometry" args={[1, 1, 1]} />
+            <boxGeometry  attach="geometry" args={[3, 3, 3]} />
             <meshStandardMaterial attach="material" color="blue" />
         </mesh>
     );

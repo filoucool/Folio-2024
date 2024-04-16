@@ -1,4 +1,4 @@
-import React, { Suspense, useState, useEffect } from 'react';
+import React, { Suspense, useState, useEffect, useRef } from 'react';
 import { Canvas, useThree, useFrame, useLoader } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { PointerLockControls, Html, Environment } from '@react-three/drei';
@@ -10,10 +10,11 @@ import OverlayControl from './Components/OverlayControl';
 import WelcomeScreen from './Components/WelcomeScreen';
 import FallingCube from './Dev/Falling_Cube';
 import TexturedFloor from './Components/TexturedFloor';
+import { Debug } from '@react-three/cannon';
 
 function Model({ modelPath, position }) {
   const [ref] = useBox(() => ({
-    mass: 1,
+    mass: 100,
     position,
   }));
   const glb = useLoader(GLTFLoader, modelPath);
@@ -35,13 +36,6 @@ function GroundPlane() {
 
 function MoveControls() {
   const { camera, clock } = useThree();
-  const [ref, api] = useSphere(() => ({
-    mass: 70,
-    type: 'Dynamic',
-    position: [0, 1.8, 0],
-    linearDamping: 0.9,  // High linear damping to quickly reduce sliding
-    angularDamping: 0.9  // Angular damping can also be set if needed
-  }));
   const [movement, setMovement] = useState({
     forward: false,
     backward: false,
@@ -55,14 +49,35 @@ function MoveControls() {
   const bobbingAmount = 0.09;
   const [isMoving, setIsMoving] = useState(false);
 
+  const [ref, api] = useSphere(() => ({
+    mass: 70,
+    type: 'Dynamic',
+    position: [0, 0, 0],
+    linearDamping: 0.1,
+    angularDamping: 1,
+    allowSleep: false
+  }));
+
+  const currentVelocity = useRef([0, 0, 0]);
+
+  // Subscribe to velocity updates
   useEffect(() => {
-    api.position.subscribe(pos => {
+    const unsubscribe = api.velocity.subscribe((velocity) => {
+        currentVelocity.current = velocity;
+    });
+    return () => unsubscribe();
+  }, [api.velocity]);
+
+  // Subscribe to position updates
+  useEffect(() => {
+    const unsubscribe = api.position.subscribe(pos => {
       camera.position.set(pos[0], pos[1], pos[2]);
       if (isMoving) {
         camera.position.y += Math.sin(clock.getElapsedTime() * bobbingSpeed) * bobbingAmount;
       }
     });
-  }, [api, isMoving, camera, clock]);
+    return () => unsubscribe();
+  }, [api.position, isMoving, camera, clock]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -102,8 +117,8 @@ function MoveControls() {
 
   useFrame(() => {
     if (!isMoving) {
-      api.velocity.set(0, 0, 0);  // Stop the movement when no key is pressed
-      return;
+        api.velocity.set(0, currentVelocity.current[1], 0); 
+        return;
     }
 
     const direction = new THREE.Vector3();
@@ -120,7 +135,7 @@ function MoveControls() {
     const speed = isRunning ? runSpeed : walkSpeed;
     direction.multiplyScalar(speed);
 
-    api.velocity.set(direction.x, 0, direction.z);
+    api.velocity.set(direction.x, currentVelocity.current[1], direction.z);
   });
 
   return null;
@@ -172,7 +187,9 @@ function App() {
       <OverlayControl />
       <div id="canvas-container" style={{ height: '100vh', width: '100vw' }}>
         <Canvas>
-          <Physics gravity={[0, -9.81, 0]}>
+          <Physics gravity={[0, -9.81, 0]} allowSleep={false}>
+          <Debug color="black" scale={1.1} >
+            <MoveControls />
             <ambientLight intensity={0.1} />
             <directionalLight color="white" position={[1, 10, 15]} />
             <Suspense fallback={null}>
@@ -180,12 +197,11 @@ function App() {
               <Model modelPath={modelPath} position={[1, 0, -2]} />
             </Suspense>
             <PointerLockControls />
-            <MoveControls />
             <GroundPlane />
             <AxisTriad size={4} />
-            <CameraPositionDisplay />
             <TexturedFloor texturePath={floorTexturePath} />
             <FallingCube />
+            </Debug>
           </Physics>
         </Canvas>
       </div>

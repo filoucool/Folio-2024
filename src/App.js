@@ -6,42 +6,16 @@ import { TextureLoader } from 'three';
 import * as THREE from 'three';
 import { createRoot } from 'react-dom/client';
 import { Physics, useBox, usePlane } from '@react-three/cannon';
-import AxisTriad from './dev_tools';
+import AxisTriad from './Dev/dev_tools';
+import OverlayControl from './Components/OverlayControl';
+import WelcomeScreen from './Components/WelcomeScreen';
+import FallingCube from './Dev/Falling_Cube';
+import TexturedFloor from './Components/TexturedFloor';
 
 function Model({ modelPath, position }) {
   const glb = useLoader(GLTFLoader, modelPath);
   return (
     <primitive object={glb.scene} position={position} />
-  );
-}
-
-function TexturedFloor({ texturePath }) {
-  const texture = useLoader(TextureLoader, texturePath);
-  const [ref] = usePlane(() => ({
-    rotation: [-Math.PI / 2, 0, 0],
-    position: [0, -3.51, 0],
-    static: true,
-  }));
-
-  return (
-    <mesh ref={ref}>
-      <planeGeometry attach="geometry" args={[60, 60]} />
-      <meshStandardMaterial attach="material" map={texture} />
-    </mesh>
-  );
-}
-
-function FallingCube() {
-  const [ref] = useBox(() => ({
-    mass: 1,
-    position: [0, 5, 0], 
-  }));
-
-  return (
-    <mesh ref={ref}>
-      <boxGeometry  attach="geometry" args={[1, 1, 1]} />
-      <meshStandardMaterial attach="material" color="blue" />
-    </mesh>
   );
 }
 
@@ -156,78 +130,6 @@ function CameraPositionDisplay() {
         x: {position.x}, y: {position.y}, z: {position.z}
       </div>
     </Html>
-  );
-}
-
-function OverlayControl() {
-  const [isOverlayVisible, setIsOverlayVisible] = useState(true);
-
-  useEffect(() => {
-    const toggleOverlay = (event) => {
-      if (event.key.toLowerCase() === 'm') {
-        setIsOverlayVisible(prev => !prev);
-      }
-    };
-
-    window.addEventListener('keydown', toggleOverlay);
-    return () => {
-      window.removeEventListener('keydown', toggleOverlay);
-    };
-  }, []);
-
-  if (!isOverlayVisible) {
-    return null;
-  }
-
-  return (
-    <div id="overlay" style={{ display: isOverlayVisible ? 'block' : 'none' }}>
-      <div style={{
-        position: 'absolute',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        color: 'white',
-        zIndex: 1000 
-      }}>
-      <img src="/media/Images/wasd-eye.png" alt="WASD controls" style={{
-        position: "absolute",
-        left: "-40vw",
-        top: "10vh",
-        maxHeight: "25vh",
-        maxWidth: "25vw",
-      }}/>
-        <p style={{
-          position: "absolute",
-          backgroundColor: 'rgba(0, 0, 0, 0.7)',
-          padding: "10px 10px",
-          borderRadius: "10px",
-          left: "-42vw",
-          textAlign: "center"
-        }}>
-          Use WASD to move around and the mouse to look around.
-          <span style={{display: "block"}}>Press escape to leave the 3D environment.</span>
-        </p>
-        <p style={{
-          backgroundColor: 'rgba(0, 0, 0, 0.7)',
-          padding: "10px 10px",
-          borderRadius: "10px",
-          textAlign: "center"
-        }}>
-          Welcome to my portfolio!
-          <span style={{display: "block"}}>Press 'M' to show/hide the overlay.</span>
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function WelcomeScreen({ onStart }) {
-  return (
-    <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0, 0, 0, 0.8)', color: 'white' }}>
-      <div style={{ textAlign: 'center' }}>
-        <h1>Welcome to My Portfolio!</h1>
-        <button onClick={onStart} style={{ padding: '10px 20px', fontSize: '20px', cursor: 'pointer' }}>Enter</button>
-      </div>
-    </div>
   );
 }
 

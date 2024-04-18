@@ -35,6 +35,22 @@ function GroundPlane() {
 }
 
 function MoveControls() {
+  // Environment Parameters 
+  const walkSpeed = 3.5;
+  const runSpeed = 8;
+  const bobbingSpeed = 12;
+  const bobbingAmount = 0.09;
+  const footstepVolumeWalking = 0.05;
+  const footstepVolumeRunning = 0.2;
+  const footstepPlaybackSpeedWalking = 1.0;
+  const footstepPlaybackSpeedRunning = 1.5;
+  const footstepCutoffWalking = 0.95;
+  const footstepCutoffRunning = 0.4;
+
+  // useStates
+  const [isRunning, setIsRunning] = useState(false);
+  const [isMoving, setIsMoving] = useState(false);
+  const [playing, setPlaying] = useState(false);
   const { camera, clock } = useThree();
   const [movement, setMovement] = useState({
     forward: false,
@@ -42,19 +58,11 @@ function MoveControls() {
     left: false,
     right: false
   });
-  const [isRunning, setIsRunning] = useState(false);
-  const walkSpeed = 3.5;
-  const runSpeed = 8;
-  const bobbingSpeed = 12;
-  const bobbingAmount = 0.09;
-  const [isMoving, setIsMoving] = useState(false);
-  const [playing, setPlaying] = useState(false);
-  const footstepVolumeWalking = 0.05;
-  const footstepVolumeRunning = 0.2;
-  const footstepPlaybackSpeedWalking = 1.0;
-  const footstepPlaybackSpeedRunning = 1.5;
-  const footstepCutoffWalking = 0.95;
-  const footstepCutoffRunning = 0.4;
+
+  // useRefs
+  const currentVelocity = useRef([0, 0, 0]);
+  const footstepAudioRef = useRef(new Audio('/media/Audio/footsteps.mp3'));
+  const audioPlayingRef = useRef(false);
 
   const [ref, api] = useBox(() => ({
     mass: 70,
@@ -65,10 +73,6 @@ function MoveControls() {
     angularDamping: 1,
     allowSleep: false
   }));
-
-  const currentVelocity = useRef([0, 0, 0]);
-  const footstepAudioRef = useRef(new Audio('/media/Audio/footsteps.mp3'));
-  const audioPlayingRef = useRef(false);
 
   useEffect(() => {
     footstepAudioRef.current.load();

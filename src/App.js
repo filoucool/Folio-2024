@@ -1,3 +1,4 @@
+// Libs
 import React, { Suspense, useState, useEffect, useRef } from 'react';
 import { Canvas, useThree, useFrame, useLoader } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
@@ -5,6 +6,8 @@ import { PointerLockControls, Environment } from '@react-three/drei';
 import { useBox, usePlane, Physics } from '@react-three/cannon';
 import * as THREE from 'three';
 import { createRoot } from 'react-dom/client';
+
+// Components
 import AxisTriad from './Dev/dev_tools';
 import OverlayControl from './Components/OverlayControl';
 import WelcomeScreen from './Components/WelcomeScreen';
@@ -187,6 +190,7 @@ const keyMap = {
 function App() {
   const modelPath = '/media/3DModels/maker_desk.glb';
   const floorTexturePath = '/media/textures/garage_floor.jpg';
+  const backgroundTexturePath = '/media/textures/concrete_wall.jpg';
   const [showWelcomeScreen, setShowWelcomeScreen] = useState(true);
 
   const startApp = () => {
@@ -208,7 +212,7 @@ function App() {
             <ambientLight intensity={0.1} />
             <directionalLight color="white" position={[1, 10, 15]} />
             <Suspense fallback={null}>
-              <Environment background={true} files="/media/textures/concrete_wall.jpg" />
+              <Environment background={true} files={backgroundTexturePath} />
               <Model modelPath={modelPath} position={[1, 0, -2]} />
             </Suspense>
             <PointerLockControls />

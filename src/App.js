@@ -2,7 +2,7 @@ import React, { Suspense, useState, useEffect, useRef } from 'react';
 import { Canvas, useThree, useFrame, useLoader } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { PointerLockControls, Html, Environment } from '@react-three/drei';
-import { useBox, usePlane, Physics, useSphere } from '@react-three/cannon';
+import { useBox, usePlane, Physics } from '@react-three/cannon';
 import * as THREE from 'three';
 import { createRoot } from 'react-dom/client';
 import AxisTriad from './Dev/dev_tools';
@@ -50,7 +50,6 @@ function MoveControls() {
   // useStates
   const [isRunning, setIsRunning] = useState(false);
   const [isMoving, setIsMoving] = useState(false);
-  const [playing, setPlaying] = useState(false);
   const { camera, clock } = useThree();
   const [movement, setMovement] = useState({
     forward: false,
@@ -62,8 +61,8 @@ function MoveControls() {
   // useRefs
   const currentVelocity = useRef([0, 0, 0]);
   const footstepAudioRef = useRef(new Audio('/media/Audio/footsteps.mp3'));
-  const audioPlayingRef = useRef(false);
 
+  // eslint-disable-next-line no-unused-vars
   const [ref, api] = useBox(() => ({
     mass: 70,
     position: [0, 0, 0],

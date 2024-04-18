@@ -3,9 +3,10 @@ import React, { Suspense, useState, useEffect, useRef } from 'react';
 import { Canvas, useThree, useFrame, useLoader } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { PointerLockControls, Environment } from '@react-three/drei';
-import { useBox, usePlane, Physics } from '@react-three/cannon';
+import { useBox, Physics } from '@react-three/cannon';
 import * as THREE from 'three';
 import { createRoot } from 'react-dom/client';
+import { Debug } from '@react-three/cannon';
 
 // Components
 import AxisTriad from './Dev/dev_tools';
@@ -13,7 +14,7 @@ import OverlayControl from './Components/OverlayControl';
 import WelcomeScreen from './Components/WelcomeScreen';
 import FallingCube from './Dev/Falling_Cube';
 import TexturedFloor from './Components/TexturedFloor';
-import { Debug } from '@react-three/cannon';
+import GroundPlane from './Components/GroundPlane'
 
 function Model({ modelPath, position }) {
   const [ref] = useBox(() => ({
@@ -22,19 +23,6 @@ function Model({ modelPath, position }) {
   }));
   const glb = useLoader(GLTFLoader, modelPath);
   return <primitive object={glb.scene} ref={ref} />;
-}
-
-function GroundPlane() {
-  const [ref] = usePlane(() => ({
-    rotation: [-Math.PI / 2, 0, 0],
-    position: [0, 0, 0]
-  }));
-  return (
-    <mesh ref={ref} receiveShadow>
-      <planeGeometry attach="geometry" args={[100, 100]} />
-      <meshStandardMaterial attach="material" color="lightgrey" />
-    </mesh>
-  );
 }
 
 function MoveControls() {

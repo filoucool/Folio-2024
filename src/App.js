@@ -48,6 +48,13 @@ function MoveControls() {
   const bobbingSpeed = 12;
   const bobbingAmount = 0.09;
   const [isMoving, setIsMoving] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const footstepVolumeWalking = 0.05;
+  const footstepVolumeRunning = 0.2;
+  const footstepPlaybackSpeedWalking = 1.0;
+  const footstepPlaybackSpeedRunning = 1.5;
+  const footstepCutoffWalking = 0.95;
+  const footstepCutoffRunning = 0.4;
 
   const [ref, api] = useBox(() => ({
     mass: 70,
@@ -60,25 +67,31 @@ function MoveControls() {
   }));
 
   const currentVelocity = useRef([0, 0, 0]);
+  const footstepAudioRef = useRef(new Audio('/media/Audio/footsteps.mp3'));
+  const audioPlayingRef = useRef(false);
 
-  // Subscribe to velocity updates
   useEffect(() => {
-    const unsubscribe = api.velocity.subscribe((velocity) => {
-        currentVelocity.current = velocity;
-    });
-    return () => unsubscribe();
-  }, [api.velocity]);
+    footstepAudioRef.current.load();
+  }, [isRunning]);
 
-  // Subscribe to position updates
-  useEffect(() => {
-    const unsubscribe = api.position.subscribe(pos => {
-      camera.position.set(pos[0], pos[1] + 2, pos[2]);
-      if (isMoving) {
-        camera.position.y += Math.sin(clock.getElapsedTime() * bobbingSpeed) * bobbingAmount;
-      }
-    });
-    return () => unsubscribe();
-  }, [api.position, isMoving, camera, clock]);
+    // Subscribe to velocity updates
+    useEffect(() => {
+      const unsubscribe = api.velocity.subscribe((velocity) => {
+          currentVelocity.current = velocity;
+      });
+      return () => unsubscribe();
+    }, [api.velocity]);
+  
+    // Subscribe to position updates
+    useEffect(() => {
+      const unsubscribe = api.position.subscribe(pos => {
+        camera.position.set(pos[0], pos[1] + 2, pos[2]);
+        if (isMoving) {
+          camera.position.y += Math.sin(clock.getElapsedTime() * bobbingSpeed) * bobbingAmount;
+        }
+      });
+      return () => unsubscribe();
+    }, [api.position, isMoving, camera, clock]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -116,10 +129,29 @@ function MoveControls() {
     };
   }, []);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      footstepAudioRef.current.playbackRate = isRunning ? footstepPlaybackSpeedRunning : footstepPlaybackSpeedWalking;
+      footstepAudioRef.current.volume = isRunning ? footstepVolumeRunning : footstepVolumeWalking;
+
+      if (isMoving && footstepAudioRef.current.paused) {
+        footstepAudioRef.current.play();
+      } else if (!isMoving) {
+        footstepAudioRef.current.pause();
+        footstepAudioRef.current.currentTime = 0;
+      }
+
+      if (footstepAudioRef.current.currentTime > footstepAudioRef.current.duration - (isRunning ? footstepCutoffRunning : footstepCutoffWalking)) {
+        footstepAudioRef.current.currentTime = 0;
+      }
+    }, 100);
+    return () => clearInterval(interval);
+  }, [isMoving, isRunning]);
+
   useFrame(() => {
     if (!isMoving) {
-        api.velocity.set(0, currentVelocity.current[1], 0); 
-        return;
+      api.velocity.set(0, currentVelocity.current[1], 0); 
+      return;
     }
 
     const direction = new THREE.Vector3();
